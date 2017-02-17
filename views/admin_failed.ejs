@@ -1,0 +1,29 @@
+<%- include header.ejs %>
+<!-- body content -->
+
+<div class="container">
+<br><br>
+  <div class="row">
+    <div class="col">
+      <h3>Authentication Failed</h3>
+      <p>Invalid Key.. You will be redirected to the Home Page in <span id="timeout">3</span> seconds</p>
+    </div>
+  </div>
+</div>
+<script>
+	$(document).ready(function(){
+		setInterval(function(){
+			var _time = $("#timeout").text();
+			$("#timeout").text(_time - 1);
+			if(_time < 0){
+			  window.location = '/';
+			}
+		}, 1000);
+		_.delay(function(text) {
+		  window.location = '/';
+		}, 3000);
+
+	})
+</script>
+<!-- end of body content -->
+<%- include footer.ejs %>

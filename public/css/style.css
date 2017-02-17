@@ -1,0 +1,41 @@
+body{
+	margin: 0;
+	background: url('../img/bg.png') fixed;
+	background-size: cover;
+	color: #fff;
+	text-transform: uppercase;
+}
+.full-width{
+	width: 100%;
+}
+.footer-images{
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100vw;
+}
+.pattern-list{
+	position: absolute;
+	right: 30px;
+	top: 30px;
+	text-align: right;
+	line-height: 1.8;
+}
+.simulator.fullscreen{
+    background: url(/img/darkShade.png) center;
+    background-size: cover;
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+}
+.active-pattern{
+	color: #ff9800 !important;
+	font-size: 16pt;
+	
+}

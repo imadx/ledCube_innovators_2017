@@ -1,0 +1,54 @@
+<%- include header.ejs %>
+<!-- body content -->
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <h1>Admin</h1>
+    </div>
+  </div>
+</div>
+
+<script>
+	adminStorage = localStorage;
+	console.log(adminStorage);
+
+	var json = {count: 1};
+	// Save data to the current local store
+	adminStorage.setItem("username", "John");
+
+	// Access some stored data
+	console.log( "username = " + adminStorage.getItem("username"));
+
+	setInterval(function(){
+		getJSON();
+		upCount();
+		saveJSON();
+
+		console.log(GLOBAL_JSON.count);
+	}, 1000);
+
+	var GLOBAL_JSON = {
+		count : 0
+	}
+
+	function getJSON(){
+		var _json = adminStorage.getItem('admin_data');
+		if(!_.isNil(_json)){
+			GLOBAL_JSON = JSON.parse(_json);
+		}
+	}
+
+	function upCount(){
+		GLOBAL_JSON.count++;
+		emitMessage('stats_main', GLOBAL_JSON);
+	}
+
+	function saveJSON(){
+		var _json_string = JSON.stringify(GLOBAL_JSON);
+		adminStorage.setItem('admin_data', _json_string);
+	}
+
+</script>
+<!-- end of body content -->
+<%- include footer.ejs %>

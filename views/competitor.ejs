@@ -1,0 +1,76 @@
+<%- include header.ejs %>
+<!-- body content -->
+
+<div id="competitorApp" style="margin: 30px;">
+  <div class="row">
+    <div class="col">
+    <hgroup>
+      <h6 style="">Current Pattern</h6>
+      <h4 class="orange-text" style="margin-top: 0; padding-top: 0;">
+        Pattern {{currentPattern}}
+      </h4>
+    </hgroup>
+    </div>
+  </div>
+  <div class="row pattern-list">
+    <div class="col">
+      <div v-show="!presentationMode" class="orange-text" @click="togglePresentationMode">
+      [Press Pattern Number or Click to Change Pattern]
+      <br><br>
+      </div>
+      <div 
+        v-for="pattern in patterns" 
+        @click="display_setPattern(pattern)"
+        :class="{'active-pattern': pattern==currentPattern}">
+          Pattern {{pattern}}
+      </div>
+    </div>
+  </div>
+  <div class="row footer-images" style="padding: 20px;">
+    <div class="col m6">
+      <img class="left" src="/img/competition_logo.png" alt="">
+    </div>
+    <div class="col m6">
+      <img class="right" style="position: absolute; bottom: 50px; right: 30px;" src="/img/footer.png" alt="">
+    </div>
+  </div>
+</div>
+<div id="threeJS_Simulator" class="simulator fullscreen"></div>
+<script type="text/javascript" src="/js/simulator.js"></script>
+
+<script>
+var app = new Vue({
+  el: '#competitorApp',
+  data: {
+    presentationMode: false,
+
+    currentPattern: 1,
+    patterns: _.range(1,11),
+
+  },
+  methods: {
+    togglePresentationMode: function(){
+      this.presentationMode = !this.presentationMode;
+    },
+    display_setPattern: function(pattern_number){
+      if(!_.isFinite(pattern_number)){
+        console.log('[display_setPattern] pattern_number: ', pattern_number);
+        return;
+      }
+
+      pattern_number = +pattern_number;
+      if(pattern_number==0) pattern_number = 10;
+      this.currentPattern = pattern_number;
+    },
+  }
+});
+</script>
+<script>
+  emitMessage('client',  'Competitor');
+
+  socket.on('stats_main', function(data){
+    console.log(data);
+  })
+</script>
+<!-- end of body content -->
+<%- include footer.ejs %>

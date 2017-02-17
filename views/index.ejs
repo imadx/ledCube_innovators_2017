@@ -1,21 +1,56 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title><%= title %></title>
-    <!--Import Google Icon Font-->
-    <link href="/fonts/icons/material-icons.css" rel="stylesheet">
-    <!--Import materialize.css-->
-    <link type="text/css" rel="stylesheet" href="/css/materialize.min.css"  media="screen,projection"/>
-    <!--Let browser know website is optimized for mobile-->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  </head>
-  <body>
+<%- include header.ejs %>
+<!-- body content -->
 
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-    
-    <!--Import jQuery before materialize.js-->
-    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-    <script type="text/javascript" src="/js/materialize.min.js"></script>
-  </body>
-</html>
+<div class="container">
+  <div class="row">
+      <img src="/img/home_header.png" class="col m12" style="max-width: 700px; padding-top: 60px;" alt="">
+      
+  </div>
+  <br>
+  <br>
+  <div class="divider"></div>
+  <div class="row section">
+      <div class="col m3"><a href="/competitor" class="btn waves-effect waves-light orange darken-1 full-width" type="submit" name="action">Competitor</a></div>
+      <div class="col m3"><a href="/judge" class="btn waves-effect waves-light orange darken-2 full-width" type="submit" name="action">Judge</a></div>
+      <div class="col m3"><a href="/scoreboard" class="btn waves-effect waves-light orange darken-3 full-width" type="submit" name="action">Scoreboard</a></div>
+      <div class="col m3"><a href="#" id="admin_link" class="btn waves-effect waves-light orange darken-4 full-width" type="submit" name="action">Admin</a></div>
+  </div>
+  <br><br>
+  <div class="row">
+    <div class="col m12 center">
+      <img src="/img/footer.png" style="padding-top: 60px;" alt="">
+    </div>
+  </div>
+</div>
+
+<script>
+
+  $("#admin_link").click(function(){
+    var password = prompt('Enter your Authentication Code', '###');
+    axios.post('/admin', {'key':password})
+    .then(function(response){
+      var _status, _key;
+      if(!_.isNil(response.data.status) 
+         && !_.isNil(response.data.key)){
+        _status = response.data.status;
+        _key = response.data.key;
+
+        if(_.isEqual(_status, 'OK')){
+          window.location ='/admin?hash=' + _key;
+        } else {
+          notify('Authentication failed!');
+        }
+      } else {
+        
+        notify('Authentication failed!');
+      }
+      console.log(response.data);
+    })
+    .catch(function(error){
+        notify('Authentication failed!');
+        console.log(error);
+    })
+  });
+</script>
+<!-- end of body content -->
+<%- include footer.ejs %>
