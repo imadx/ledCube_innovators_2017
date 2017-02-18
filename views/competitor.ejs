@@ -21,7 +21,7 @@
       </div>
       <div 
         v-for="pattern in patterns" 
-        @click="display_setPattern(pattern)"
+        @click="display_setPattern(pattern, '')"
         :class="{'active-pattern': pattern==currentPattern}">
           Pattern {{pattern}}
       </div>
@@ -78,10 +78,14 @@ var app = new Vue({
     togglePresentationMode: function(){
       this.presentationMode = !this.presentationMode;
     },
-    display_setPattern: function(pattern_number){
+    display_setPattern: function(pattern_number, from){
       if(!_.isFinite(pattern_number)){
         console.log('[display_setPattern] pattern_number: ', pattern_number);
         return;
+      }
+
+      if(!_.isEqual(from, 'from_simulator')){
+        setPattern(pattern_number);
       }
 
       pattern_number = +pattern_number;
@@ -110,7 +114,6 @@ var app = new Vue({
       console.log('changing', _value)
 
       app.display_setPattern(_value);
-      setPattern(_value);
     }
 
     console.log(data);

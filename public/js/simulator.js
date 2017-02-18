@@ -231,7 +231,7 @@ $(document).keyup( function(e){
 	if(e.keyCode == 32){
 		mouseMove_enabled = !mouseMove_enabled;
 	} else if (e.keyCode >= 48 && e.keyCode <= 57){
-		app.display_setPattern(e.keyCode - 48);
+		app.display_setPattern(e.keyCode - 48, 'from_simulator');
 		setPattern(e.keyCode - 48);
 	}
 });
