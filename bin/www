@@ -47,6 +47,11 @@ io.on('connection', function(socket){
     console.dir(data);
     io.emit('stats_main', data);
   });
+  socket.on('commands_main', function(data){
+    console.log('commands_main')
+    console.dir(data);
+    io.emit('commands_main', data);
+  });
 });
 
 /**

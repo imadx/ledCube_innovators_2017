@@ -39,3 +39,18 @@ body{
 	font-size: 16pt;
 	
 }
+.widget .amber-text{
+    margin: 0;
+    font-weight: bold;
+}
+#qrcode{
+	border: solid #fff 10px;
+	background: #fff;
+	border-radius: 4px;
+	margin-bottom: 10px;
+}
+.totally-disabled{
+	opacity: 0.5;
+	filter: grayscale(1);
+	pointer-events: none;
+}

@@ -37,7 +37,6 @@
   </div>
 </div>
 <div id="threeJS_Simulator" class="simulator fullscreen"></div>
-<script type="text/javascript" src="/js/simulator.js"></script>
 
 <script>
 var app = new Vue({
@@ -47,6 +46,32 @@ var app = new Vue({
 
     currentPattern: 1,
     patterns: _.range(1,11),
+
+    world:{
+      saveCount: {
+        count: 0,
+        lastSaved: new Date()
+      },
+      currentPattern: 1,
+      patterns: {},
+      teamsOnStage: [],
+      teams: {
+        0:{
+          id: 'team1',
+          name: 'Team Name',
+          scores: {
+            0: [0,0,0,0,0,0,0,0,0,0],
+            1: [0,0,0,0,0,0,0,0,0,0],
+            2: [0,0,0,0,0,0,0,0,0,0],
+          },
+        }
+      },
+      judges: {
+        0: 'Judge Name',
+        1: 'Judge Name',
+        2: 'Judge Name',
+      }
+    },
 
   },
   methods: {
@@ -66,10 +91,28 @@ var app = new Vue({
   }
 });
 </script>
+
+
+<script type="text/javascript" src="/js/simulator.js"></script>
+
 <script>
   emitMessage('client',  'Competitor');
 
   socket.on('stats_main', function(data){
+    app.world = data;
+    console.log(data);
+  })
+  socket.on('commands_main', function(data){
+    var _command = data.type;
+    var _value = +data.value;
+
+    if(_.isEqual(_command, 'change_display_pattern') && _.isFinite(_value)){
+      console.log('changing', _value)
+
+      app.display_setPattern(_value);
+      setPattern(_value);
+    }
+
     console.log(data);
   })
 </script>

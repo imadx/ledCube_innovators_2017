@@ -17,17 +17,19 @@ router.get('/competitor', function(req, res, next) {
 });
 
 router.get('/judge', function(req, res, next) {
-  res.render('judge');
+	res.redirect('/')
+  // res.render('judge');
 });
 
 router.get('/scoreboard', function(req, res, next) {
-  res.render('scoreboard');
+	res.redirect('/')
+  // res.render('scoreboard');
 });
 
 router.get('/admin', function(req, res, next) {
 	var _key = req.query.hash;
 	if(_.isEqual(_key, current_admin_uuid)){
-		res.render('admin');
+		res.render('admin', {});
 	} else {
 		res.render('admin_failed');		
 	}

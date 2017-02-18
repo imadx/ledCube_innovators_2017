@@ -127,6 +127,10 @@ var turnOnAll = function(){
 
 	}
 var getJsonPattern = function(patternName){
+	if(!_.isNil(app) && !_.isEmpty(app.world.patterns)){
+		prepareJSONdata(app.world.patterns[_.replace(patternName,'pattern','')]);
+		return;
+	}
 	$.getJSON("/patterns/"+patternName+".json", function(json) {
 	// $.getJSON("pattern3.json", function(json) {
 	    prepareJSONdata(json);

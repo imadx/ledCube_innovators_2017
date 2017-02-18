@@ -1,54 +1,379 @@
 <%- include header.ejs %>
+
+<script src="/js/qrcode.min.js"></script>
+
 <!-- body content -->
+<div id="adminApp" class="">
+	<div class="row section">
+		<div class="col m12">
+			<h5 style="display: inline;">Admin
+			<small v-show="world.saveCount.count > 0" style="font-size: 11pt; opacity: 0.4;">
+			<small>Saved count:</small> {{world.saveCount.count}} times. <small>Last Saved on</small> {{new Date(world.saveCount.lastSaved).toGMTString()}}
+			</small>
+			</h5>
+			<div class="right">
+				<a href="#"
+					@click="resetSavedData"
+					class="btn waves-effect waves-light amber darken-3">
+				Reset Data </a>
+				<a href="#"
+					@click="restoreFromBackupSavedData"
+					class="btn waves-effect waves-light amber darken-4">
+				Restore Data </a>
+				 
+			</div>
+		</div>
+	</div>
+	<div class="row section">
+	<!--
+		d8888b.  .d8b.  d888888b d888888b d88888b d8888b. d8b   db .d8888.
+		88  `8D d8' `8b `~~88~~' `~~88~~' 88'     88  `8D 888o  88 88'  YP
+		88oodD' 88ooo88    88       88    88ooooo 88oobY' 88V8o 88 `8bo.
+		88~~~   88~~~88    88       88    88~~~~~ 88`8b   88 V8o88   `Y8b.
+		88      88   88    88       88    88.     88 `88. 88  V888 db   8D
+		88      YP   YP    YP       YP    Y88888P 88   YD VP   V8P `8888Y'
+		
+		
+	 -->
 
-<div class="container">
-  <div class="row">
-    <div class="col">
-      <h1>Admin</h1>
-    </div>
-  </div>
+		<div class="col m3 l2">
+			<h6>Patterns</h6>
+			<div class="section widget">
+				<small>Last shown Pattern</small>
+				<h5 class="amber-text">Pattern {{world.currentPattern}}</h5>
+			</div>
+			<div class="section">
+				<h6 style="opacity: 0.4">All Patterns</h6>
+				<div class="row" style="margin-bottom: 0;" 
+				v-for="(pattern, key, index) in world.patterns">
+					<span class="left" style="line-height: 36px;">Pattern {{key}}</span>
+					<span class="right">
+						<a class="btn-flat grey-text lighten-5-text waves-light waves-effect"
+							@click="setCurrentPattern(key)">SET</a>
+						<a class="btn-flat grey-text lighten-5-text waves-light waves-effect"
+							@click="editPattern(key)">{{editWorld_currentPattern==key ? 'DONE' : 'EDIT'}}</a>
+					</span>
+					<div class="edit" v-show="editWorld_currentPattern==key">
+						<input type="number" v-model="pattern.length"> 
+						<textarea class="materialize-textarea" v-model="pattern.pattern" @change="changed_pattern(key,pattern.pattern)"></textarea>
+					</div>
+				</div>
+			</div>
+			<div class="section">
+				
+				<a
+					@click=""
+					class="btn waves-effect waves-light amber darken-4 full-width">
+				Update </a>
+			</div>
+		</div>
+
+		<!--
+			d888888b d88888b  .d8b.  .88b  d88. .d8888.
+			`~~88~~' 88'     d8' `8b 88'YbdP`88 88'  YP
+			   88    88ooooo 88ooo88 88  88  88 `8bo.
+			   88    88~~~~~ 88~~~88 88  88  88   `Y8b.
+			   88    88.     88   88 88  88  88 db   8D
+			   YP    Y88888P YP   YP YP  YP  YP `8888Y'
+			
+			
+		 -->
+
+		<div class="col m3 l2 totally-disabled">
+			<h6>Teams</h6>
+			<div class="section widget">
+				<small>Total Teams</small>
+				<h5 class="amber-text">10</h5>
+			</div>
+			<div class="section widget">
+				<small>Scoreboard Teams</small>
+				<h5 class="amber-text">Team 1</h5>
+				and
+				<h5 class="amber-text">Team 2</h5>
+				<br><br>
+				<a href="#"
+					@click=""
+					class="btn waves-effect waves-light amber darken-4 full-width">
+				Change </a>
+			</div>
+			<div class="section">
+				<h6 style="opacity: 0.4">All Teams</h6>
+				<div class="row">
+					<span class="left">
+						<input type="text" value="Team Name 1" style="margin-bottom: 0">
+					</span>
+					<span class="right"><i  style="line-height: 46px" class="material-icons right">close</i></span>
+					<span class="right" style="line-height: 46px">Team 1</span>
+					
+				</div>
+				<a href="#"
+					@click=""
+					class="btn waves-effect waves-light amber darken-3">
+				Edit Teams </a>
+				<a href="#"
+					@click=""
+					class="btn waves-effect waves-light amber darken-4">
+				Add Team </a>
+			</div>
+		</div>
+
+		<!--
+			   d88b db    db d8888b.  d888b  d88888b .d8888.
+			   `8P' 88    88 88  `8D 88' Y8b 88'     88'  YP
+			    88  88    88 88   88 88      88ooooo `8bo.
+			    88  88    88 88   88 88  ooo 88~~~~~   `Y8b.
+			db. 88  88b  d88 88  .8D 88. ~8~ 88.     db   8D
+			Y8888P  ~Y8888P' Y8888D'  Y888P  Y88888P `8888Y'
+			
+			
+		 -->
+
+		<div class="col m3 l2  totally-disabled">
+			<h6>Judges</h6>
+			<div class="section widget">
+				<small>Total Judges</small>
+				<h5 class="amber-text">4</h5>
+			</div>
+			<div class="section">
+				<h6 style="opacity: 0.4">All Judges</h6>
+				<div class="row">
+					<span class="left">Judge 1</span>
+					<span class="right"><i class="material-icons">close</i></span>
+					<span class="green-text">
+						<i class="material-icons left" style="margin-left: 15px; margin-right: 4px;">fiber_manual_record</i> Connected
+					</span>
+					
+				</div>
+				<div class="row">
+					<span class="left">Judge 2</span>
+					<span class="right"><i class="material-icons">close</i></span>
+					<span class="blue-grey-text text-lighten-2">
+						<i class="material-icons left" style="margin-left: 15px; margin-right: 4px;">fiber_manual_record</i> Offline
+					</span>
+					
+				</div>
+				<div class="section">
+				<div id="qrcode" style="display: block; margin: 0 auto;"></div>
+				<a href="#"
+					@click=""
+					class="btn waves-effect waves-light amber darken-4 full-width">
+				Create Judge </a>
+				</div>
+			</div>
+		</div>
+
+		<!--
+			.d8888.  .o88b.  .d88b.  d8888b. d88888b .d8888.
+			88'  YP d8P  Y8 .8P  Y8. 88  `8D 88'     88'  YP
+			`8bo.   8P      88    88 88oobY' 88ooooo `8bo.
+			  `Y8b. 8b      88    88 88`8b   88~~~~~   `Y8b.
+			db   8D Y8b  d8 `8b  d8' 88 `88. 88.     db   8D
+			`8888Y'  `Y88P'  `Y88P'  88   YD Y88888P `8888Y'
+			
+			
+		 -->
+
+		<div class="col m3 l6  totally-disabled">
+			<h6>Scores</h6>
+			<div class="section widget">
+				<small>Leading Team</small>
+				<h5 class="amber-text">Team 1 <small class="amber-text text-darken-2">234pts</small></h5>
+			</div>
+
+			<div class="section">
+				<table class="bordered responsive-table">
+					<thead>
+						<tr>
+							<th>Team</th>
+							<th>Score</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Team 1</td>
+							<td style="text-align: right;">234 pts.</td>
+						</tr>
+					</tbody>
+						
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<br><br>
+	<div class="row">
+		<div class="col m12 center">
+			<img src="/img/footer.png" style="padding-top: 60px;" alt="">
+		</div>
+	</div>
 </div>
-
 <script>
-	adminStorage = localStorage;
-	console.log(adminStorage);
+var adminStorage = localStorage;
 
-	var json = {count: 1};
-	// Save data to the current local store
-	adminStorage.setItem("username", "John");
+var autoSaveInterval = setInterval(function(){
+	// app.restoreJSON();
+	app.saveJSON();
+}, 30000);
 
-	// Access some stored data
-	console.log( "username = " + adminStorage.getItem("username"));
+var app = new Vue({
+	el: '#adminApp',
+	data: {
+		world:{
+			saveCount: {
+				count: 0,
+				lastSaved: new Date()
+			},
+			currentPattern: 1,
+			patterns: {},
+			teamsOnStage: [],
+			teams: {
+				0:{
+					id: 'team1',
+					name: 'Team Name',
+					scores: {
+						0: [0,0,0,0,0,0,0,0,0,0],
+						1: [0,0,0,0,0,0,0,0,0,0],
+						2: [0,0,0,0,0,0,0,0,0,0],
+					},
+				}
+			},
+			judges: {
+				0: 'Judge Name',
+				1: 'Judge Name',
+				2: 'Judge Name',
+			}
+		},
+		saveWorld_debounced: null,
+		saveWorld_changing: false,
 
-	setInterval(function(){
-		getJSON();
-		upCount();
-		saveJSON();
+		editWorld_currentPattern: null,
+	},
+	methods: {
+		restoreJSON: function(){
+				var _json = adminStorage.getItem('admin_data');
+				if(!_.isNil(_json)){
+					this.world = JSON.parse(_json);
+				}
+			},
+		saveJSON: function(){
+			this.world.saveCount.count++;
+			this.world.saveCount.lastSaved = new Date();
 
-		console.log(GLOBAL_JSON.count);
-	}, 1000);
+			console.dir(this.world.patterns[1].length);
+			emitMessage('stats_main', this.world);
+			var _json_string = JSON.stringify(this.world);
+			adminStorage.setItem('admin_data', _json_string);
+		},
+		resetSavedData: function(){
+			if(app.world.saveCount.count > 0){
+				var _json_string = JSON.stringify(app.world);
+				adminStorage.clear();
+				adminStorage.setItem('admin_data_backup', _json_string);
+				window.location = '';
+				
+			} else {
+				notify('No fresh data to reset');
+			}
+		},
+		restoreFromBackupSavedData: function(){
+			var _json = adminStorage.getItem('admin_data_backup');
+			if(!_.isNil(_json)){
+				this.world = JSON.parse(_json);
+			}
+		},
+		createQRcode: function(){
+			new QRCode(document.getElementById("qrcode"), window.location.origin + "/judge");
+		},
+		setCurrentPattern: function(id){
+			this.world.currentPattern = id;
 
-	var GLOBAL_JSON = {
-		count : 0
-	}
+			emitMessage('commands_main',{
+				type: 'change_display_pattern',
+				value: id
+			})
+		},
+		editPattern: function(id){
+			if(this.editWorld_currentPattern == id){
+				this.editWorld_currentPattern = null;
+				return;
+			}
+			this.editWorld_currentPattern = id;
+		},
+		changed_pattern: function(id, _pattern){
+			if(_.isString(_pattern)){
+				app.world.patterns[id].pattern = JSON.parse(_pattern);
+			}
+		},
+		getPatterns: function(){
 
-	function getJSON(){
-		var _json = adminStorage.getItem('admin_data');
-		if(!_.isNil(_json)){
-			GLOBAL_JSON = JSON.parse(_json);
+			if(!_.isEmpty(this.world.patterns)){
+				notify('Using updated patterns. Reset if needed.')
+				return;
+			}
+			console.log('[getPatterns]', 'getting patterns');
+
+			var _tmp_patterns = []
+			var _tmp_patterns_obj = {};
+
+			for (var i = 1; i <= 10; i++) {
+
+				axios.get('patterns/pattern' + i + '.json')
+				.then(function(response){
+
+					_tmp_patterns.push(response.data);
+
+					if(_tmp_patterns.length == 10){
+						_tmp_patterns_obj = _.zipObject(_.range(1,11), _tmp_patterns);
+
+						app.world.patterns = _tmp_patterns_obj;
+
+						console.dir(app.world.patterns);
+						console.log('[getPatterns]', 'patterns loaded');
+					}
+				})
+				.catch(function(error){
+					notify('error reading pattern' + i);
+					console.error(error);
+				});
+
+			}
+
+
+
+		},
+	},
+	created: function(){
+		this.restoreJSON();
+		this.getPatterns();
+	},
+	watch: {
+		world: {
+			handler: function(e){
+				console.log('changed', e);
+				console.dir(app.saveWorld_debounced);
+
+				if(!_.isNull(app.saveWorld_debounced)){
+					app.saveWorld_debounced.cancel();
+				}
+
+				app.saveWorld_debounced = _.debounce(function(){
+					app.saveJSON()
+					console.log('called debounce')
+				}, 1000, {
+					'leading': true,
+					'trailing': false,
+				});
+				if(app.saveWorld_changing){
+					app.saveWorld_debounced();
+					app.saveWorld_changing = false;
+				} else {
+					app.saveWorld_changing = true;
+				}
+			},
+			deep: true
 		}
 	}
-
-	function upCount(){
-		GLOBAL_JSON.count++;
-		emitMessage('stats_main', GLOBAL_JSON);
-	}
-
-	function saveJSON(){
-		var _json_string = JSON.stringify(GLOBAL_JSON);
-		adminStorage.setItem('admin_data', _json_string);
-	}
-
+});
 </script>
 <!-- end of body content -->
 <%- include footer.ejs %>
