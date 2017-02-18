@@ -210,10 +210,7 @@
 <script>
 var adminStorage = localStorage;
 
-var autoSaveInterval = setInterval(function(){
-	// app.restoreJSON();
-	app.saveJSON();
-}, 30000);
+var autoSaveInterval;
 
 var app = new Vue({
 	el: '#adminApp',
@@ -345,12 +342,14 @@ var app = new Vue({
 	created: function(){
 		this.restoreJSON();
 		this.getPatterns();
+		autoSaveInterval = setInterval(function(){
+			// app.restoreJSON();
+			app.saveJSON();
+		}, 30000);
 	},
 	watch: {
 		world: {
 			handler: function(e){
-				console.log('changed', e);
-				console.dir(app.saveWorld_debounced);
 
 				if(!_.isNull(app.saveWorld_debounced)){
 					app.saveWorld_debounced.cancel();
