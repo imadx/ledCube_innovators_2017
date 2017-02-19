@@ -1,12 +1,187 @@
 <%- include header.ejs %>
 <!-- body content -->
 
-<div class="container">
+<div class="container" id="judgeApp">
+<br>
+<br>
   <div class="row">
-    <div class="col">
-      <h1>Judge</h1>
+    <div class="col s12">
+    	<img src="/img/judge_header.png" style="max-width: 507px; max-width: 80%;" alt="">
+		<br>
+	  	<div class="card black-text" @click="changeJudgeName()">
+	  	<div class="card-content">
+	  		{{judge.name}} <small>{{judge.id}}</small>
+	  	</div>
+	  	</div>
+    </div>
+  	<div class="col m6 s12">
+  		<div class="card black-text full-width">
+  			<div class="card-content">
+	  			<div class="card-title">{{team1.name}} <small>{{team1.id}}</small></div>
+  				<div class="collection">
+  					<div 
+  					v-for="(pattern, index) in team1.scores[judge.id]"
+  					class="collection-item row">
+  						<div class="col s12">Pattern {{index+1}}</div>
+  						<div class="divider"></div>
+  						<div class="s12 center">
+  							<a class="btn-floating waves-effect waves-light" @click="setScore(1,index,1)" :class="{blue:scorePassed('team1',judge.id,index,20), 'blue-grey lighten-3': !scorePassed('team1',judge.id,index,20)}">1</a>
+  							<a class="btn-floating waves-effect waves-light" @click="setScore(1,index,2)" :class="{blue:scorePassed('team1',judge.id,index,40), 'blue-grey lighten-3': !scorePassed('team1',judge.id,index,40)}">2</a>
+  							<a class="btn-floating waves-effect waves-light" @click="setScore(1,index,3)" :class="{blue:scorePassed('team1',judge.id,index,60), 'blue-grey lighten-3': !scorePassed('team1',judge.id,index,60)}">3</a>
+  							<a class="btn-floating waves-effect waves-light" @click="setScore(1,index,4)" :class="{blue:scorePassed('team1',judge.id,index,80), 'blue-grey lighten-3': !scorePassed('team1',judge.id,index,80)}">4</a>
+  							<a class="btn-floating waves-effect waves-light" @click="setScore(1,index,5)" :class="{blue:scorePassed('team1',judge.id,index,100), 'blue-grey lighten-3': !scorePassed('team1',judge.id,index,100)}">5</a>
+  						</div>
+  					</div>
+  						
+  				</div>
+  			</div>
+  		</div>
+  	</div>
+  	<div class="col m6 s12">
+  		<div class="card black-text full-width">
+  			<div class="card-content">
+	  			<div class="card-title">{{team2.name}} <small>{{team2.id}}</small></div>
+  				<div class="collection">
+  					<div 
+  					v-for="(pattern, index) in team2.scores[judge.id]"
+  					class="collection-item row">
+  						<div class="col s12">Pattern {{index+1}}</div>
+  						<div class="divider"></div>
+  						<div class="s12 center">
+  							<a class="btn-floating waves-effect waves-light" @click="setScore(2,index,1)" :class="{red:scorePassed('team2',judge.id,index,20), 'blue-grey lighten-3': !scorePassed('team2',judge.id,index,20)}">1</a>
+  							<a class="btn-floating waves-effect waves-light" @click="setScore(2,index,2)" :class="{red:scorePassed('team2',judge.id,index,40), 'blue-grey lighten-3': !scorePassed('team2',judge.id,index,40)}">2</a>
+  							<a class="btn-floating waves-effect waves-light" @click="setScore(2,index,3)" :class="{red:scorePassed('team2',judge.id,index,60), 'blue-grey lighten-3': !scorePassed('team2',judge.id,index,60)}">3</a>
+  							<a class="btn-floating waves-effect waves-light" @click="setScore(2,index,4)" :class="{red:scorePassed('team2',judge.id,index,80), 'blue-grey lighten-3': !scorePassed('team2',judge.id,index,80)}">4</a>
+  							<a class="btn-floating waves-effect waves-light" @click="setScore(2,index,5)" :class="{red:scorePassed('team2',judge.id,index,100), 'blue-grey lighten-3': !scorePassed('team2',judge.id,index,100)}">5</a>
+  						</div>
+  					</div>
+  						
+  				</div>
+  			</div>
+  		</div>
+  	</div>
+  	
+  </div>
+  <div class="row">
+    <div class="s12 center">
+    	<img src="/img/footer.png" style="max-width: 393px; max-width: 80%;" alt="">
     </div>
   </div>
 </div>
+
+<script>
+	var app = new Vue({
+		el: '#judgeApp',
+		data: {
+			judge:{
+				id: 'judge0',  
+				name:'Waiting for server', 
+				hash: '<%= key_hash %>', 
+				connected: true},
+			team1: {
+				id: 'team1',
+				name: 'Team Name',
+				scores: {
+					judge0: [0,0,0,0,0,0,0,0,0,0],
+				},
+			},
+			team2: {
+				id: 'team2',
+				name: 'Team Name',
+				scores: {
+					judge0: [0,0,0,0,0,0,0,0,0,0],
+				},
+			},
+		},
+		methods: {
+			setScore: function(team, index, score){
+				var _team = 'team' + team;
+				var _score = score*20;
+
+				var _team_id = this.team1.id;
+				var _scores = [0,0,0,0,0,0,0,0,0,0];
+
+				if(team==1){
+
+					_scores = this.team1.scores[this.judge.id];
+					_scores[index] = _score;
+					this.team1.scores[this.judge.id] = _scores;
+
+					var _judgedScores = this.team1.scores;
+					console.log(_judgedScores);
+					Vue.set(this.team1, 'scores', _judgedScores);
+					console.dir(this.team1.scores)
+
+				} else if(team==2){
+
+					_team_id = this.team2.id;
+
+					_scores = this.team2.scores[this.judge.id];
+					_scores[index] = _score;
+					this.team2.scores[this.judge.id] = _scores;
+
+
+				} else {
+					notify('Invalid Team ID, contact Admin');
+					return;
+				}
+
+				emitMessage('scores_judge', {
+					judge_id: app.judge.id,
+					team_id: _team_id,
+					scores: _scores,
+				});
+
+			},
+			scorePassed: function(team_id, judge_id, index, score){
+				if(this[team_id].scores[judge_id][index] >= score){
+					return true;
+				}
+				return false;
+			},
+			changeJudgeName: function(){
+				var _name = prompt('Please enter your name');
+
+				if(!_.isEmpty(_name)){
+					this.judge.name = _name;
+					emitMessage('judge_name', { 
+						id: this.judge.id,
+						name: _name, 
+					});
+				}
+			}
+		},
+		mounted: function(){
+			setTimeout(function(){
+				if(_.startsWith(app.judge.name, 'Judge')){
+					app.changeJudgeName();
+				}
+				
+			}, 2000)
+		},
+	});
+</script>
+
+<script>
+
+  emitMessage('client_judge',  '<%= key_hash %>');
+
+  socket.on('stats_main', function(data){
+	var _judge_id = '<%= judge_id %>';
+    app.judge = data.judges[_judge_id];
+
+    app.team1 = data.teams[data.teamsOnStage[0]];
+    app.team2 = data.teams[data.teamsOnStage[1]];
+
+    console.log(data);
+  })
+  socket.on('commands_judge', function(data){
+    var _command = data.type;
+    var _value = +data.value;
+
+    console.log(data);
+  })
+</script>
+
 <!-- end of body content -->
 <%- include footer.ejs %>

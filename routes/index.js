@@ -16,9 +16,19 @@ router.get('/competitor', function(req, res, next) {
   res.render('competitor');
 });
 
-router.get('/judge', function(req, res, next) {
-	res.redirect('/')
-  // res.render('judge');
+router.get('/judge', function(req, res, next) {	
+
+	var _id = req.query.id;
+	var _key = req.query.hash;
+	var _hashes = GLOBAL.io.getJudges_hashes();
+
+	console.log(_key, _hashes);
+
+	if(_.indexOf(_hashes, _key) != -1){
+		res.render('judge', {key_hash: _key, judge_id: _id});
+	} else {
+		res.render('judge_failed');		
+	}
 });
 
 router.get('/scoreboard', function(req, res, next) {

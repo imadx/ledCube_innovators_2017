@@ -3,7 +3,7 @@
 <script src="/js/qrcode.min.js"></script>
 
 <!-- body content -->
-<div id="adminApp" class="">
+<div id="adminApp" class="admin-interface">
 	<div class="row section">
 		<div class="col m12">
 			<h5 style="display: inline;">Admin
@@ -12,11 +12,15 @@
 			</small>
 			</h5>
 			<div class="right">
-				<a href="#"
+				<a
+					onclick="emitMessage('reload_all','')"
+					class="btn waves-effect waves-light amber darken-3">
+				Reload Clients </a>
+				<a
 					@click="resetSavedData"
 					class="btn waves-effect waves-light amber darken-3">
 				Reset Data </a>
-				<a href="#"
+				<a
 					@click="restoreFromBackupSavedData"
 					class="btn waves-effect waves-light amber darken-4">
 				Restore Data </a>
@@ -36,7 +40,7 @@
 		
 	 -->
 
-		<div class="col m3 l2">
+		<div class="col s6 m3 l2">
 			<h6>Patterns</h6>
 			<div class="section widget">
 				<small>Last shown Pattern</small>
@@ -79,41 +83,68 @@
 			
 		 -->
 
-		<div class="col m3 l2 totally-disabled">
+		<div class="col s6 m3 l2">
 			<h6>Teams</h6>
 			<div class="section widget">
 				<small>Total Teams</small>
-				<h5 class="amber-text">10</h5>
+				<h5 class="amber-text">{{_.size(world.teams)}}</h5>
 			</div>
 			<div class="section widget">
 				<small>Scoreboard Teams</small>
-				<h5 class="amber-text">Team 1</h5>
+				<h5 class="amber-text">{{currentTeamsOnStage[0]}}</h5>
 				and
-				<h5 class="amber-text">Team 2</h5>
-				<br><br>
-				<a href="#"
-					@click=""
+				<h5 class="amber-text">{{currentTeamsOnStage[1]}}</h5>
+				<br>
+				<a
+					@click="editWorld_team_toggleEnableChangeTeamsOnStage()"
 					class="btn waves-effect waves-light amber darken-4 full-width">
-				Change </a>
+				{{editWorld_team_enableChangeTeamsOnStage ? 'Done Changing':'Change'}}
+				</a>
+				<br><br>
+				<div class="row" v-show="editWorld_team_enableChangeTeamsOnStage">
+					<p>Click to toggle teams</p>
+					<div class="chip"
+						v-for="team in world.teams"
+						:class="{amber: (_.indexOf(world.teamsOnStage, team.id) != -1)}"
+						@click="team_toggleCurrentTeamsOnStage(team.id)"
+					>{{team.name}}</div>
+				</div>
 			</div>
 			<div class="section">
 				<h6 style="opacity: 0.4">All Teams</h6>
-				<div class="row">
+				<div class="row" v-for="team in world.teams">
 					<span class="left">
-						<input type="text" value="Team Name 1" style="margin-bottom: 0">
+						<input type="text" v-model="team.name"
+						:style="{pointerEvents: (editWorld_team_enableEdits?'all':'none'), opacity:(editWorld_team_enableEdits?'1':'0.8')}"
+						style="margin-bottom: 0">
 					</span>
-					<span class="right"><i  style="line-height: 46px" class="material-icons right">close</i></span>
-					<span class="right" style="line-height: 46px">Team 1</span>
+					<span class="right" 
+					v-show="editWorld_team_enableEdits"
+					@click="team_removeTeam(team.id)"><i style="line-height: 46px; cursor: pointer;" class="material-icons right">close</i></span>
+					<span class="left" style="line-height: 46px">{{team.id}}</span>
 					
 				</div>
-				<a href="#"
-					@click=""
+				<a
+					@click="editWorld_team_toggleEnableEdits()"
 					class="btn waves-effect waves-light amber darken-3">
-				Edit Teams </a>
-				<a href="#"
-					@click=""
+				{{editWorld_team_enableEdits ? 'Done Editing' : 'Edit Teams' }} </a>
+				<a
+					v-show="!editWorld_team_enableAdds"
+					@click="editWorld_team_toggleEnableAdds() "
 					class="btn waves-effect waves-light amber darken-4">
 				Add Team </a>
+				<div class="row" v-show="editWorld_team_enableAdds">
+					<br>
+					<div class="divider"></div>
+					<br>
+					<br>
+					<input type="text" v-model="editWorld_team_newTeam" placeholder="Enter Team name">
+					<button 
+					@click="teams_addTeam()"
+					class="btn waves-effect waves-light amber darken-4 full-width">
+						Add New Team
+					</button>
+				</div>
 			</div>
 		</div>
 
@@ -128,35 +159,53 @@
 			
 		 -->
 
-		<div class="col m3 l2  totally-disabled">
+		<div class="col s12 m3 l2">
 			<h6>Judges</h6>
 			<div class="section widget">
 				<small>Total Judges</small>
-				<h5 class="amber-text">4</h5>
+				<h5 class="amber-text">{{_.size(world.judges)}}</h5>
 			</div>
 			<div class="section">
 				<h6 style="opacity: 0.4">All Judges</h6>
-				<div class="row">
-					<span class="left">Judge 1</span>
-					<span class="right"><i class="material-icons">close</i></span>
-					<span class="green-text">
-						<i class="material-icons left" style="margin-left: 15px; margin-right: 4px;">fiber_manual_record</i> Connected
-					</span>
-					
+				<p>Click on a judge to show QR code</p>
+				<div class="row" 
+				:class="{'amber-text': (judge.id === editWorld_judges_activeJudge)}"
+				@click="set_judges_activeJudge(judge)"
+				v-for="judge in world.judges">
+					<span class="left">{{judge.id}}</span>
+					<span 
+					@click="judges_removeJudge(judge.id)"
+					v-show="editWorld_judges_enableEdits" 
+					class="right"><i class="material-icons">close</i></span>
+					<template v-if="judge.connected">
+						<span class="green-text">
+							<i class="material-icons left" style="margin-left: 15px; margin-right: 4px;">fiber_manual_record</i> Connected
+						</span>
+					</template>
+					<template v-else>
+						<span class="blue-grey-text text-lighten-2">
+							<i class="material-icons left" style="margin-left: 15px; margin-right: 4px;">fiber_manual_record</i> Offline
+						</span>
+					</template>
+					<br>
+					<span class="full-width yellow-text left" style="opacity: 0.9; text-transform: none;">{{ judge.name }}</span>
+					<span class="full-width left" style="opacity: 0.7; text-transform: none;">{{(host) + '/judge?id=' + judge.id + '&hash=' + judge.hash}}</span>
 				</div>
-				<div class="row">
-					<span class="left">Judge 2</span>
-					<span class="right"><i class="material-icons">close</i></span>
-					<span class="blue-grey-text text-lighten-2">
-						<i class="material-icons left" style="margin-left: 15px; margin-right: 4px;">fiber_manual_record</i> Offline
-					</span>
-					
-				</div>
-				<div class="section">
+
+				<div class="row" v-show="editWorld_judges_activeJudge !== null">
+				<p>url for {{editWorld_judges_activeJudge}}</p>
 				<div id="qrcode" style="display: block; margin: 0 auto;"></div>
-				<a href="#"
-					@click=""
-					class="btn waves-effect waves-light amber darken-4 full-width">
+				</div>
+
+				<div class="row">
+					
+				<a
+					@click="editWorld_judges_toggleEnableEdits"
+					class="btn waves-effect waves-light amber darken-3">
+				{{editWorld_judges_enableEdits ? 'DONE' : 'EDIT'}} </a>
+				<a
+					@click="judges_createJudge"
+					class="btn waves-effect waves-light amber darken-4">
 				Create Judge </a>
 				</div>
 			</div>
@@ -173,11 +222,11 @@
 			
 		 -->
 
-		<div class="col m3 l6  totally-disabled">
+		<div class="col s12 m3 l6 ">
 			<h6>Scores</h6>
 			<div class="section widget">
 				<small>Leading Team</small>
-				<h5 class="amber-text">Team 1 <small class="amber-text text-darken-2">234pts</small></h5>
+				<h5 class="amber-text">{{this.world.teams[leadingTeam].name}} <small class="amber-text text-darken-2">{{leadingTeam_score}} pts</small></h5>
 			</div>
 
 			<div class="section">
@@ -185,13 +234,20 @@
 					<thead>
 						<tr>
 							<th>Team</th>
-							<th>Score</th>
+							<th v-once v-for="(pattern, index) in world.patterns">{{index}}</th>
+							<th class="right">Total</th>
 						</tr>
 					</thead>
 					<tbody>
-						<tr>
-							<td>Team 1</td>
-							<td style="text-align: right;">234 pts.</td>
+						<tr v-for="team in orderedTeams">
+							<td>{{team.name}} <small>{{team.id}}</small></td>
+							<td v-for="(pattern, index) in world.patterns">
+								<div v-for='judge in world.judges'>
+									{{team.scores[judge.id][index-1]}}
+									
+								</div>
+							</td>
+							<td style="text-align: right;">{{totalScores[team.id].score}} pts.</td>
 						</tr>
 					</tbody>
 						
@@ -203,18 +259,29 @@
 	<br><br>
 	<div class="row">
 		<div class="col m12 center">
-			<img src="/img/footer.png" style="padding-top: 60px;" alt="">
+			<img src="/img/footer.png" style="position: fixed; bottom: 30px; right: 30px; " alt="">
 		</div>
 	</div>
 </div>
 <script>
 var adminStorage = localStorage;
-
 var autoSaveInterval;
+
+/*
+	d8888b. d88888b d88888b
+	88  `8D 88'     88'
+	88   88 88ooooo 88ooo
+	88   88 88~~~~~ 88~~~
+	88  .8D 88.     88
+	Y8888D' Y88888P YP
+	
+	
+*/
 
 var app = new Vue({
 	el: '#adminApp',
 	data: {
+
 		world:{
 			saveCount: {
 				count: 0,
@@ -224,33 +291,47 @@ var app = new Vue({
 			patterns: {},
 			teamsOnStage: [],
 			teams: {
-				0:{
+				'team1':{
 					id: 'team1',
 					name: 'Team Name',
 					scores: {
-						0: [0,0,0,0,0,0,0,0,0,0],
-						1: [0,0,0,0,0,0,0,0,0,0],
-						2: [0,0,0,0,0,0,0,0,0,0],
+						judge1: [0,0,0,0,0,0,0,0,0,0],
 					},
 				}
 			},
 			judges: {
-				0: 'Judge Name',
-				1: 'Judge Name',
-				2: 'Judge Name',
+				'judge1': {id: 'judge1',  name:'Judge Name 1', hash: 'kj23lkj234', connected: false},
 			}
 		},
 		saveWorld_debounced: null,
 		saveWorld_changing: false,
 
 		editWorld_currentPattern: null,
+		editWorld_currentTeams: null,
+
+		editWorld_team_newTeam: null,
+		editWorld_team_enableEdits: false,
+		editWorld_team_enableAdds: false,
+		editWorld_team_enableChangeTeamsOnStage: false,
+
+		editWorld_judges_activeJudge: null,
+		editWorld_judges_enableEdits: false,
+		host: window.location.host,
+
+		orderedByScore: true,
+		leadingTeam: 'team1',
+		leadingTeam_score: 0,
 	},
 	methods: {
 		restoreJSON: function(){
 				var _json = adminStorage.getItem('admin_data');
+				console.log(_json);
+
 				if(!_.isNil(_json)){
 					this.world = JSON.parse(_json);
+					notify('Loaded saved data');
 				}
+				notify('Fresh Start!');
 			},
 		saveJSON: function(){
 			this.world.saveCount.count++;
@@ -278,9 +359,222 @@ var app = new Vue({
 				this.world = JSON.parse(_json);
 			}
 		},
-		createQRcode: function(){
-			new QRCode(document.getElementById("qrcode"), window.location.origin + "/judge");
+		/*
+			d888888b d88888b  .d8b.  .88b  d88. .d8888.
+			`~~88~~' 88'     d8' `8b 88'YbdP`88 88'  YP
+			   88    88ooooo 88ooo88 88  88  88 `8bo.
+			   88    88~~~~~ 88~~~88 88  88  88   `Y8b.
+			   88    88.     88   88 88  88  88 db   8D
+			   YP    Y88888P YP   YP YP  YP  YP `8888Y'
+			
+			
+		*/
+		team_toggleCurrentTeamsOnStage: function(team_id){
+
+			var _teamsOnStage = this.world.teamsOnStage;
+
+
+			if(_.indexOf(_teamsOnStage, team_id) != -1){
+				_teamsOnStage.splice(_teamsOnStage.indexOf(team_id), 1);
+
+				// Vue.set(this.world, 'teamsOnStage', _teamsOnStage);
+
+			} else {
+				if(_.size(_teamsOnStage)<2){
+					_teamsOnStage.push(team_id);
+				} else {
+					notify('2 members already on stage')
+				}
+			}
+			
 		},
+		teams_addTeam: function(){
+
+			if(!confirm('This will reset any existing scores. Continue?')){
+				return;
+			}
+			var _teams = this.world.teams;
+
+			var _id = 'team' + (_.size(_teams) + 2);
+			_teams[_id] = {
+				id: _id,
+				name: this.editWorld_team_newTeam,
+				scores: {
+					0: [0,0,0,0,0,0,0,0,0,0],
+					1: [0,0,0,0,0,0,0,0,0,0],
+					2: [0,0,0,0,0,0,0,0,0,0],
+				},
+			}
+
+			this.world.teams = _teams;
+
+			this.editWorld_team_updateTeamIndexes();
+			this.editWorld_scores_updateScoreIndexes();
+
+			this.editWorld_team_newTeam = null;
+			this.editWorld_team_enableAdds = false;
+			notify('New Team added');
+
+			
+		},
+
+		team_removeTeam: function(team_id){
+
+			if(!confirm('This will reset any existing scores. Continue?')){
+				return;
+			}
+
+			var _newTeams = _.omit(this.world.teams, team_id);
+			this.world.teams = _newTeams;
+
+			this.editWorld_team_updateTeamIndexes()
+		},	
+		editWorld_team_updateTeamIndexes: function(){
+
+			var _fixedTeams = {}
+			var _oldTeams = this.world.teams;
+
+			var _index = 1;
+			_.forEach(_oldTeams, function(value, key) {
+				value.id = 'team' + _index;
+				_fixedTeams[value.id] = value;
+				_index++;
+			});
+
+			this.world.teams = _fixedTeams;
+		},
+		
+		editWorld_team_toggleEnableEdits: function(){
+			this.editWorld_team_enableEdits = !this.editWorld_team_enableEdits;
+		},
+		editWorld_team_toggleEnableAdds: function(){
+
+			if(this.editWorld_team_enableAdds) {
+				editWorld_team_newTeam = null;
+			}
+			this.editWorld_team_enableAdds = !this.editWorld_team_enableAdds;
+
+		},
+		editWorld_team_toggleEnableChangeTeamsOnStage: function(){
+			this.editWorld_team_enableChangeTeamsOnStage = !this.editWorld_team_enableChangeTeamsOnStage;
+		},
+
+		/*
+			   d88b db    db d8888b.  d888b  d88888b
+			   `8P' 88    88 88  `8D 88' Y8b 88'
+			    88  88    88 88   88 88      88ooooo
+			    88  88    88 88   88 88  ooo 88~~~~~
+			db. 88  88b  d88 88  .8D 88. ~8~ 88.
+			Y8888P  ~Y8888P' Y8888D'  Y888P  Y88888P
+			
+			
+		*/
+
+		createQRcode: function(id, hash){
+			var _url = window.location.origin + '/judge?id=' + id + '&hash=' + hash;
+		
+			$("#qrcode").empty();
+			new QRCode(document.getElementById("qrcode"), {
+				text:_url,
+				width: 180,
+				height: 180,
+			});
+
+		},
+		set_judges_activeJudge: function(judge){
+			this.editWorld_judges_activeJudge = judge.id;
+			this.createQRcode(judge.id, judge.hash);
+		},
+		editWorld_judges_toggleEnableEdits: function(){
+			this.editWorld_judges_enableEdits = !this.editWorld_judges_enableEdits;
+		},
+		judges_createJudge: function(){
+
+			if(!confirm('This will reset any existing scores. Continue?')){
+				return;
+			}
+
+			var _judges = this.world.judges;
+
+			var _id = 'judge' + (_.size(_judges) + 2);
+			var _hash = randomString(16, '#a');
+			_judges[_id] = {id: _id,  name:'Judge Name', hash:_hash, connected: false};
+
+			this.world.judges = _judges;
+
+			this.editWorld_judges_updateJudgeIndexes()
+
+			notify('New Judge added');
+
+			
+		},
+
+		judges_removeJudge: function(judge_id){
+
+
+			if(!confirm('This will reset any existing scores. Continue?')){
+				return;
+			}
+
+			var _newJudges = _.omit(this.world.judges, judge_id);
+			this.world.judges = _newJudges;
+
+			this.editWorld_judges_updateJudgeIndexes()
+		},	
+		editWorld_judges_updateJudgeIndexes: function(){
+
+			var _fixedJudges = {}
+			var _oldJudges = this.world.judges;
+
+			var _index = 1;
+			_.forEach(_oldJudges, function(value, key) {
+				value.id = 'judge' + _index;
+				_fixedJudges[value.id] = value;
+				_index++;
+			});
+
+			this.world.judges = _fixedJudges;
+
+			this.editWorld_scores_updateScoreIndexes();
+		},
+
+		/*
+			.d8888.  .o88b.  .d88b.  d8888b. d88888b .d8888.
+			88'  YP d8P  Y8 .8P  Y8. 88  `8D 88'     88'  YP
+			`8bo.   8P      88    88 88oobY' 88ooooo `8bo.
+			  `Y8b. 8b      88    88 88`8b   88~~~~~   `Y8b.
+			db   8D Y8b  d8 `8b  d8' 88 `88. 88.     db   8D
+			`8888Y'  `Y88P'  `Y88P'  88   YD Y88888P `8888Y'
+			
+			
+		*/
+
+		editWorld_scores_updateScoreIndexes: function(){
+
+			var _fixedScores = {}
+
+			var _index = 1;
+			_.forEach(this.world.judges, function(value, key) {
+				_fixedScores['judge' + _index] = [0,0,0,0,0,0,0,0,0,0];
+				_index++;
+			});
+
+			for (var i = 1; i <= _.size(this.world.teams); i++) {
+				Vue.set( this.world.teams['team' + i], 'scores', _.clone(_fixedScores));
+			}
+
+		},
+		/*
+			d8888b.  .d8b.  d888888b d888888b d88888b d8888b. d8b   db
+			88  `8D d8' `8b `~~88~~' `~~88~~' 88'     88  `8D 888o  88
+			88oodD' 88ooo88    88       88    88ooooo 88oobY' 88V8o 88
+			88~~~   88~~~88    88       88    88~~~~~ 88`8b   88 V8o88
+			88      88   88    88       88    88.     88 `88. 88  V888
+			88      YP   YP    YP       YP    Y88888P 88   YD VP   V8P
+			
+			
+		*/
+
 		setCurrentPattern: function(id){
 			this.world.currentPattern = id;
 
@@ -324,6 +618,7 @@ var app = new Vue({
 
 						app.world.patterns = _tmp_patterns_obj;
 
+						// console.dir(_tmp_patterns_obj);
 						console.dir(app.world.patterns);
 						console.log('[getPatterns]', 'patterns loaded');
 					}
@@ -339,6 +634,64 @@ var app = new Vue({
 
 		},
 	},
+	computed: {
+		currentTeamsOnStage: function(){
+
+			var _teams = this.world.teamsOnStage;
+
+			if(_.size(_teams) == 1){
+				return [this.world.teams[_teams[0]].name, '??????'];
+			} else if (_.size(_teams) == 2){
+				return [this.world.teams[_teams[0]].name, this.world.teams[_teams[1]].name];
+			}
+			return ['??????', '??????']
+		},
+
+		orderedTeams: function(){
+			if(this.orderedByScore){
+
+				var _orderedArray = _.reverse(_.sortBy(this.totalScores, function(o){
+									return o.score;
+								}));
+
+				var _orderedTeams = {}
+				var vm = this;
+
+				this.leadingTeam = _orderedArray[0].team;
+				this.leadingTeam_score = _orderedArray[0].score;
+				_.each(_orderedArray, function(o){
+					_orderedTeams[o.team] = vm.world.teams[o.team];
+				})
+
+				return _orderedTeams;
+
+			}
+			return this.world.teams;
+		},
+		totalScores: function(){
+
+			var _scores =_.mapValues(this.world.teams, function(o) { 
+				return _.mapValues(o.scores, function(o) {
+					return _.sum(o);
+				}); 
+			});
+
+			var _totals = _.mapValues(_scores, function(o){
+				return _.sum(_.values(o));
+			})
+
+			var _totalsFixed = {};
+
+			_.forEach(_totals, function(value, key) {
+				_totalsFixed[key] = {
+					'team': key,
+					'score': value
+				}
+			});
+
+			return (_totalsFixed);
+		},
+	},
 	created: function(){
 		this.restoreJSON();
 		this.getPatterns();
@@ -346,6 +699,7 @@ var app = new Vue({
 			// app.restoreJSON();
 			app.saveJSON();
 		}, 30000);
+
 	},
 	watch: {
 		world: {
@@ -357,7 +711,7 @@ var app = new Vue({
 
 				app.saveWorld_debounced = _.debounce(function(){
 					app.saveJSON()
-					console.log('called debounce')
+					// console.log('called debounce')
 				}, 1000, {
 					'leading': true,
 					'trailing': false,
@@ -371,8 +725,47 @@ var app = new Vue({
 			},
 			deep: true
 		}
-	}
+	}, 
 });
+</script>
+
+
+<script>
+  emitMessage('client', 'admin');
+
+  socket.on('client_judge_on', function(data){
+    var _key = data;
+    var _judge = _.find(app.world.judges, function(o) { return _.isEqual(_key, o.hash) });
+
+    _judge.connected = true;
+    app.world.judges[_judge.id] = _judge;
+
+    console.log(data);
+  })
+  socket.on('client_judge_off', function(data){
+    var _key = data;
+    var _judge = _.find(app.world.judges, function(o) { return _.isEqual(_key, o.hash) });
+
+    _judge.connected = false;
+    app.world.judges[_judge.id] = _judge;
+
+    console.log(data);
+  })
+  socket.on('scores_judge', function(data){
+  	var _judge = data.judge_id;
+  	var _team = data.team_id;
+  	var _scores = data.scores;
+
+  	app.world.teams[_team].scores[_judge] = _scores;
+    console.log(data);
+  })
+  socket.on('judge_name', function(data){
+  	var _judge = data.id;
+  	var _name = data.name;
+
+  	app.world.judges[_judge].name = _name;
+    console.log(data);
+  })
 </script>
 <!-- end of body content -->
 <%- include footer.ejs %>

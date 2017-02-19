@@ -22,6 +22,9 @@
         <script src="/socket.io/socket.io.js"></script>
         <script>
         var socket = io();
+        socket.on('reload_all', function(){
+            location.reload();
+        }); 
         </script>
         <script type="text/javascript" src="/js/helpers.js"></script>
         <!-- <script src="http://localhost:60000/autoreload.js"></script> -->

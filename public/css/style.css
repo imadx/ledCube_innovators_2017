@@ -48,9 +48,25 @@ body{
 	background: #fff;
 	border-radius: 4px;
 	margin-bottom: 10px;
+
+}
+#qrcode img{
+	margin: 0 auto;
 }
 .totally-disabled{
 	opacity: 0.5;
 	filter: grayscale(1);
 	pointer-events: none;
+}
+@media only screen and (max-width: 1368px){
+	.admin-interface{
+		font-size: 9pt;
+	}
+	.admin-interface .btn-flat,
+	.admin-interface .btn{
+		padding: 0 1rem !important;
+	}
+	.admin-interface .widget .amber-text{
+	    font-size: 14pt;
+	}
 }
