@@ -12,6 +12,7 @@
 			</small>
 			</h5>
 			<div class="right">
+				<span>{{total_clients}} Total Client(s)&nbsp;&nbsp;</span> 
 				<a
 					onclick="emitMessage('reload_all','')"
 					class="btn waves-effect waves-light amber darken-1">
@@ -325,6 +326,8 @@ var app = new Vue({
 		orderedByScore: true,
 		leadingTeam: 'team1',
 		leadingTeam_score: 0,
+
+		total_clients: 0,
 	},
 	methods: {
 		restoreJSON: function(){
@@ -779,6 +782,13 @@ var app = new Vue({
   	var _name = data.name;
 
   	app.world.judges[_judge].name = _name;
+    console.log(data);
+  })
+
+  socket.on('total_clients', function(data){
+  	var _total_clients = data
+
+  	app.total_clients = _total_clients;
     console.log(data);
   })
 

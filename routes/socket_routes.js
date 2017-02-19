@@ -9,6 +9,7 @@ function saveJudges(_judges) {
     judges = _judges;
 };
 
+var total_clients =0;
 module.exports = function(server) {
 
     var io = require('socket.io')(server);
@@ -17,12 +18,17 @@ module.exports = function(server) {
     io.on('connection', function(socket) {
         console.log('a user connected');
 
+        if(_.isFinite(total_clients)) total_clients++;
+
+
         if(!_.isNil(last_stats_main)) {
           io.emit('stats_main', last_stats_main);
         }
 
+        io.emit('total_clients', total_clients);
         socket.on('disconnect', function() {
             console.log('user disconnected');
+            if(_.isFinite(total_clients)) total_clients--;
 
             _.forEach(conections_judge, function(value, key) {
                 if(_.isEqual(value, socket.id)){
@@ -32,6 +38,8 @@ module.exports = function(server) {
                   delete conections_judge[key];
                 }
             });
+            
+            io.emit('total_clients', total_clients);
         });
         socket.on('client', function(data) {
             console.log('client')
