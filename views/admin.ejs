@@ -14,16 +14,20 @@
 			<div class="right">
 				<a
 					onclick="emitMessage('reload_all','')"
-					class="btn waves-effect waves-light amber darken-3">
+					class="btn waves-effect waves-light amber darken-1">
 				Reload Clients </a>
+				<a
+					@click="restoreFromBackupSavedData"
+					class="btn waves-effect waves-light amber darken-2">
+				Restore Data </a>
 				<a
 					@click="resetSavedData"
 					class="btn waves-effect waves-light amber darken-3">
 				Reset Data </a>
 				<a
-					@click="restoreFromBackupSavedData"
+					onclick="hardResetLocalStorage()"
 					class="btn waves-effect waves-light amber darken-4">
-				Restore Data </a>
+				Hard Reset Data </a>
 				 
 			</div>
 		</div>
@@ -325,12 +329,15 @@ var app = new Vue({
 	methods: {
 		restoreJSON: function(){
 				var _json = adminStorage.getItem('admin_data');
-				console.log(_json);
 
 				if(!_.isNil(_json)){
 					this.world = JSON.parse(_json);
 					notify('Loaded saved data');
+					return;
 				}
+
+
+				emitMessage('stats_main', this.world);
 				notify('Fresh Start!');
 			},
 		saveJSON: function(){
@@ -343,6 +350,10 @@ var app = new Vue({
 			adminStorage.setItem('admin_data', _json_string);
 		},
 		resetSavedData: function(){
+
+			if(!confirm('This will reset ALL DATA. Can be restored, just once. Continue?')){
+				return;
+			}
 			if(app.world.saveCount.count > 0){
 				var _json_string = JSON.stringify(app.world);
 				adminStorage.clear();
@@ -424,6 +435,10 @@ var app = new Vue({
 				return;
 			}
 
+			if(_.size(this.world.teams) < 2){
+				notify('Only 1 team left. I Quit.');
+				return;
+			}
 			var _newTeams = _.omit(this.world.teams, team_id);
 			this.world.teams = _newTeams;
 
@@ -766,6 +781,15 @@ var app = new Vue({
   	app.world.judges[_judge].name = _name;
     console.log(data);
   })
+
+  function hardResetLocalStorage(){
+	if(!confirm('This will reset ALL DATA. Continue?')){
+		return;
+	}
+
+  	localStorage.clear();
+  	location.reload();
+  }
 </script>
 <!-- end of body content -->
 <%- include footer.ejs %>
