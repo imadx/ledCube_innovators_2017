@@ -94,7 +94,7 @@
 				<h5 class="amber-text">{{_.size(world.teams)}}</h5>
 			</div>
 			<div class="section widget">
-				<small>Scoreboard Teams</small>
+				<small>On-Stage Teams</small>
 				<h5 class="amber-text">{{currentTeamsOnStage[0]}}</h5>
 				and
 				<h5 class="amber-text">{{currentTeamsOnStage[1]}}</h5>
@@ -243,7 +243,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr v-for="team in orderedTeams">
+						<tr v-for="team in orderedTeams" :class="{'amber-text': (_.indexOf(world.teamsOnStage,team.id) != -1)}">
 							<td>{{team.name}} <small>{{team.id}}</small></td>
 							<td v-for="(pattern, index) in world.patterns">
 								<div v-for='judge in world.judges'>

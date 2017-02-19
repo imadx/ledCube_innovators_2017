@@ -170,8 +170,17 @@
 	var _judge_id = '<%= judge_id %>';
     app.judge = data.judges[_judge_id];
 
+    if(data.teamsOnStage.length != 2){
+    	notify('2 Teams not staged yet. Contact Admin!')
+    	notify('May be the teams just switched!')
+    	return;
+    }
     app.team1 = data.teams[data.teamsOnStage[0]];
     app.team2 = data.teams[data.teamsOnStage[1]];
+
+    Vue.set(app.team1, 'id', app.team1.id)
+    Vue.set(app.team1, 'name', app.team1.name)
+    Vue.set(app.team1, 'scores', app.team1.scores)
 
     console.log(data);
   })
