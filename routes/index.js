@@ -32,8 +32,7 @@ router.get('/judge', function(req, res, next) {
 });
 
 router.get('/scoreboard', function(req, res, next) {
-	res.redirect('/')
-  // res.render('scoreboard');
+  res.render('scoreboard');
 });
 
 router.get('/admin', function(req, res, next) {

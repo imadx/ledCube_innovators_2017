@@ -58,6 +58,38 @@ body{
 	filter: grayscale(1);
 	pointer-events: none;
 }
+.scoreboard-disp{
+	width: 25vw;
+	display: block;
+	position: absolute;
+	top: 130px;
+}
+.scoreboard-disp .marks{
+	margin-bottom: 4px;
+	display: block;
+	height: 18px;
+}
+.scoreboard-disp .marks-pattern{
+	display: inline-block; width: 22%; 
+	line-height: 16px;
+	font-size: 9pt;
+}
+.scoreboard-disp .marks-progress{
+	background: #caff3a ;
+	height: 16px;
+	border-radius: 10px;
+	display: inline-block;
+	width: 0%;
+	transition: all .3s;
+
+}
+#team1_scoreboard{
+	left: 40px;
+}
+#team2_scoreboard{
+	right: 40px;
+	text-align: right;
+}
 @media only screen and (max-width: 1368px){
 	.admin-interface{
 		font-size: 9pt;

@@ -1,30 +1,246 @@
 <%- include header.ejs %>
 <!-- body content -->
 
-<div class="container">
+<div id="competitorApp" style="margin: 30px; min-width: 800px; min-height: 600; display: block">
   <div class="row">
-      <img src="/img/home_header.png" class="col m12" style="max-width: 700px; padding-top: 60px;" alt="">
-      
+    <div class="col">
+    <hgroup>
+      <h6 style="">Current Pattern</h6>
+      <h5 class="lime-text" style="margin-top: 0; padding-top: 0;">
+        Pattern {{currentPattern}}
+      </h5>
+    </hgroup>
+    </div>
   </div>
-  <br>
-  <br>
-  <div class="divider"></div>
-  <div class="row section">
-      <div class="col m3"><a class="btn waves-effect waves-light orange darken-1 full-width" type="submit" name="action">Competitor</a></div>
-      <div class="col m3"><a class="btn waves-effect waves-light orange darken-2 full-width" type="submit" name="action">Judge</a></div>
-      <div class="col m3"><a class="btn waves-effect waves-light orange darken-3 full-width" type="submit" name="action">Scoreboard</a></div>
-      <div class="col m3"><a class="btn waves-effect waves-light orange darken-4 full-width" type="submit" name="action">Admin</a></div>
+
+  <div id="team1_scoreboard" class="scoreboard-disp">
+    <h6 style="margin: 0; margin-bottom: 5px;">{{computed_team1ID}}</h6>
+    <h5 style="margin: 0; margin-bottom: 20px;" class="lime-text">{{computed_team1Name}} <small class="lime-text text-darken-2">{{calculatedScores_team1[0]}} pts</small></h5>
+    <div class="marks" v-for="n in 10">
+      <span class="left marks-pattern">Pattern {{n}}</span>
+      <span class="marks-progress left" :style="{width: getWidth_team1(n)+'%'}"></span>
+    </div>
   </div>
-  <br><br>
-  <div class="row">
-    <div class="col m12 center">
-      <img src="/img/footer.png" style="padding-top: 60px;" alt="">
+  <div id="team2_scoreboard" class="scoreboard-disp">
+    <h6 style="margin: 0; margin-bottom: 5px;">{{computed_team2ID}}</h6>
+    <h5 style="margin: 0; margin-bottom: 20px;" class="lime-text">{{computed_team2Name}} <small class="lime-text text-darken-2">{{calculatedScores_team2[0]}} pts</small></h5>
+    <div class="marks" v-for="n in 10">
+      <span class="right marks-pattern">Pattern {{n}}</span>
+      <span class="marks-progress right" :style="{width: getWidth_team2(n)+'%'}"></span>
+    </div>
+  </div>
+  <div class="row footer-images" style="padding: 20px;">
+    <div class="col m6">
+      <img class="left" src="/img/competition_logo.png" style="width: 350px;" alt="">
+    </div>
+    <div class="col m6">
+      <img class="right" style="position: absolute; bottom: 50px; right: 30px; width: 300px;" src="/img/footer.png" alt="">
     </div>
   </div>
 </div>
+<div id="threeJS_Simulator" class="simulator fullscreen"></div>
 
 <script>
-  
+var app = new Vue({
+  el: '#competitorApp',
+  data: {
+    presentationMode: false,
+
+    currentPattern: 1,
+    patterns: _.range(1,11),
+
+    world:{
+      saveCount: {
+        count: 0,
+        lastSaved: new Date()
+      },
+      currentPattern: 1,
+      patterns: {},
+      teamsOnStage: [],
+      teams: {
+        0:{
+          id: 'team1',
+          name: 'Team Name',
+          scores: {
+            0: [0,0,0,0,0,0,0,0,0,0],
+            1: [0,0,0,0,0,0,0,0,0,0],
+            2: [0,0,0,0,0,0,0,0,0,0],
+          },
+        }
+      },
+      judges: {
+        0: 'Judge Name',
+        1: 'Judge Name',
+        2: 'Judge Name',
+      }
+    },
+
+  },
+  methods: {
+    togglePresentationMode: function(){
+      this.presentationMode = !this.presentationMode;
+    },
+    display_setPattern: function(pattern_number, from){
+      if(!_.isFinite(pattern_number)){
+        console.log('[display_setPattern] pattern_number: ', pattern_number);
+        return;
+      }
+
+      if(!_.isEqual(from, 'from_simulator')){
+        setPattern(pattern_number);
+      }
+
+      pattern_number = +pattern_number;
+      if(pattern_number==0) pattern_number = 10;
+      this.currentPattern = pattern_number;
+    },
+    getWidth_team1: function(i){
+
+      var max_1 = _.max(_.slice(this.calculatedScores_team1, 1));
+      var max_2 = _.max(_.slice(this.calculatedScores_team2, 1));
+      var max = _.max([max_1,max_2]);
+      
+      var max = _.max(_.slice(this.calculatedScores_team1, 1));
+      return 75*((1.0 * this.calculatedScores_team1[i]) /max)
+
+    },
+    getWidth_team2: function(i){
+
+      var max_1 = _.max(_.slice(this.calculatedScores_team1, 1));
+      var max_2 = _.max(_.slice(this.calculatedScores_team2, 1));
+      var max = _.max([max_1,max_2]);
+      
+      return 75*((1.0 * this.calculatedScores_team2[i]) /max)
+
+    },
+  },
+  computed: {
+    computed_team1ID:function(){
+      if(!this.world.teamsOnStage){
+        return 'Waiting';
+      }
+      if(this.world.teamsOnStage.length<1){
+        // notify('Waiting for teams!');
+        return 'Waiting';
+      }
+
+      return this.world.teamsOnStage[0];
+    },
+    computed_team1Name: function(){
+      if(_.isNil(this.computed_team1ID )){
+        return;
+      }
+      if(_.isEqual(this.computed_team1ID,'Waiting')){
+        return [0,0,0,0,0,0,0,0,0,0,0];
+      }
+
+      return this.world.teams[this.computed_team1ID].name;
+
+    },
+    calculatedScores_team1: function(){
+
+      var _teamScores;
+      try{
+        _teamScores = this.world.teams[this.computed_team1ID].scores;
+      } catch(e){
+        // notify('Waiting for data');
+        return '#';
+      }
+
+      var _tmp_scores_array = [0,0,0,0,0,0,0,0,0,0,0];
+
+
+      _.each(_teamScores, function(o){
+
+        var _index = 0;
+
+        _.each(o, function(val){
+          _tmp_scores_array[_index+1] += val;
+          _index++;
+        })
+      })
+
+      _tmp_scores_array[0] = _.sum(_tmp_scores_array);
+
+      return (_tmp_scores_array);
+
+    },
+    computed_team2ID:function(){
+      if(!this.world.teamsOnStage){
+        return 'Waiting';
+      }
+      if(this.world.teamsOnStage.length<2){
+        // notify('Waiting for teams!');
+        return 'Waiting';
+      }
+
+      return this.world.teamsOnStage[1];
+    },
+    computed_team2Name: function(){
+      if(_.isNil(this.computed_team2ID )){
+        return;
+      }
+      if(_.isEqual(this.computed_team2ID,'Waiting')){
+        return [0,0,0,0,0,0,0,0,0,0,0];
+      }
+
+      return this.world.teams[this.computed_team2ID].name;
+
+    },
+    calculatedScores_team2: function(){
+
+      var _teamScores;
+      try{
+        _teamScores = this.world.teams[this.computed_team2ID].scores;
+      } catch(e){
+        // notify('Waiting for data');
+        return '#';
+      }
+
+      var _tmp_scores_array = [0,0,0,0,0,0,0,0,0,0,0];
+
+
+      _.each(_teamScores, function(o){
+
+        var _index = 0;
+
+        _.each(o, function(val){
+          _tmp_scores_array[_index+1] += val;
+          _index++;
+        })
+      })
+
+      _tmp_scores_array[0] = _.sum(_tmp_scores_array);
+
+      return (_tmp_scores_array);
+
+    }
+  }
+});
+</script>
+
+
+<script type="text/javascript" src="/js/simulator.js"></script>
+
+<script>
+  emitMessage('client',  'Competitor');
+
+  socket.on('stats_main', function(data){
+    app.world = data;
+    console.log(data);
+  })
+  socket.on('commands_main', function(data){
+    var _command = data.type;
+    var _value = +data.value;
+
+    if(_.isEqual(_command, 'change_display_pattern') && _.isFinite(_value)){
+      console.log('changing', _value)
+
+      app.display_setPattern(_value);
+    }
+
+    console.log(data);
+  })
 </script>
 <!-- end of body content -->
 <%- include footer.ejs %>
